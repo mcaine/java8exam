@@ -10,9 +10,12 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.LongPredicate;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
+
+import javax.xml.transform.stream.StreamSource;
 
 import org.junit.Test;
 
@@ -74,12 +77,57 @@ public class JavaStreams {
 		myStream3.forEach((Number n) -> System.out.println(n.intValue()));
 		
 		Number[] myNumbers = {1, 2, 3, 4L, Math.PI};
-		Stream<? super Number> numberStream = Stream.of(myNumbers);
-		Stream<? extends Number> numberStream2 = Stream.of(myNumbers);
+		Stream<Number> numberStream = Stream.of(myNumbers);
+		Stream<? super Number> numberStream2 = Stream.of(myNumbers);
+		Stream<? extends Number> numberStream3 = Stream.of(myNumbers);
 		
-		//numberStream.forEach(n -> System.out.println(n.intValue()));  // doesn't compile
-		numberStream2.forEach(n -> System.out.println(n.intValue()));
+		numberStream.forEach(n -> System.out.println(n.intValue()));
+		//numberStream2.forEach(n -> System.out.println(n.intValue()));  // doesn't compile
+		numberStream3.forEach(n -> System.out.println(n.intValue()));
 	}
+	
+	@Test
+	public void testStreamPrimitives() {
+		
+		// java.util.stream.DoubleStream
+		DoubleStream doubleStream = DoubleStream.of(1.23, 4.56);
+		DoubleStream doubleStream2 = DoubleStream.of(1.23F, 4.56F);
+		DoubleStream doubleStream3 = DoubleStream.of(1, 2);
+		DoubleStream doubleStream4 = DoubleStream.of(1L, 2l);
+		DoubleStream doubleStream5 = DoubleStream.of(1L, 2.34);
+		
+		// java.util.stream.IntStream
+		IntStream intStream = IntStream.of(1, 2, 3);
+		
+		// java.util.stream.LongStream
+		LongStream longStream = LongStream.of(1L, 2L, 3L);
+		LongStream longStream2 = LongStream.of(1, 2, 3);
+	}
+	
+	@Test(expected=IllegalStateException.class)
+	public void testStreamOperatedOn() {
+		IntStream nums = IntStream.rangeClosed(1, 10);
+		
+		IntStream even = nums.filter(i -> i % 2 == 0);
+		IntStream odds = nums.filter(i -> i % 2 != 0);
+	}
+	
+	@Test
+	public void testIntStream() {
+		IntStream nums = IntStream.rangeClosed(1, 10);
+		
+		IntStream even = nums.filter(i -> i % 2 == 0);
+		IntStream evenBig = even.filter(i -> i > 7);
+		
+		assertEquals(2, evenBig.count()); // 8 and 10
+	}
+	
+	@Test
+	public void testCollect() {
+		
+	}
+	
+	
 	
 	@Test
 	public void testParallel() {
