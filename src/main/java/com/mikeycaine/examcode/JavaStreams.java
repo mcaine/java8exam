@@ -2,16 +2,20 @@ package com.mikeycaine.examcode;
 
 import static org.junit.Assert.*;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.DoubleConsumer;
 import java.util.function.LongPredicate;
+import java.util.function.ObjIntConsumer;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
@@ -40,8 +44,14 @@ public class JavaStreams {
 		// 4
 		// 5
 
-		List<Integer> result = Stream.of("ace ", "jack ", "queen ", "king ", "joker ").mapToInt(card -> card.length())
-				.filter(len -> len > 3).peek(System.out::println).limit(2).boxed().collect(Collectors.toList());
+		List<Integer> result = 
+				Stream.of("ace ", "jack ", "queen ", "king ", "joker ")
+				.mapToInt(card -> card.length())
+				.filter(len -> len > 3)
+				.peek(System.out::println)
+				.limit(2)
+				.boxed()
+				.collect(Collectors.toList());
 
 		assertThat(result.size(), is(2));
 		assertThat(result.get(0), is(4));
@@ -128,6 +138,18 @@ public class JavaStreams {
 
 	@Test
 	public void testCollect() {
+		
+		IntStream is = IntStream.of(23, 24, 25, 26, 27).parallel();
+		
+		// can't do this
+		//is.collect(Collectors.toList());
+		
+		Supplier<List<String>> supplier = () -> new ArrayList<String>();
+		ObjIntConsumer<List<String>> accumulator = (List<String> s, int i) -> s.add(String.valueOf(i));
+		BiConsumer<List<String>, List<String>> combiner = (s, s2) -> s.addAll(s2);
+		List<String> s =  is.collect(supplier, accumulator, combiner);
+		
+		s.forEach(System.out::println);
 
 	}
 
