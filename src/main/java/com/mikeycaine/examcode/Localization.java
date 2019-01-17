@@ -9,8 +9,11 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.Month;
 import java.time.MonthDay;
+import java.time.OffsetDateTime;
 import java.time.Period;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoField;
 import java.time.temporal.ChronoUnit;
@@ -206,6 +209,58 @@ public class Localization {
 	}
 	
 	@Test
+	public void testLocalDateTimeFormatsOK() {
+		final LocalDateTime dt = LocalDateTime.of(LocalDate.of(2019, 1, 17), LocalTime.of(17, 7));
+		
+		assertThat(dt.format(DateTimeFormatter.BASIC_ISO_DATE), is("20190117"));
+		assertThat(dt.format(DateTimeFormatter.ISO_LOCAL_DATE), is("2019-01-17"));
+		assertThat(dt.format(DateTimeFormatter.ISO_DATE), is("2019-01-17"));
+		assertThat(dt.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME), is("2019-01-17T17:07:00"));
+	}
+	
+	// java.time.temporal.UnsupportedTemporalTypeException: Unsupported field: OffsetSeconds
+	@Test(expected = UnsupportedTemporalTypeException.class)
+	public void testLocalDateTimeFormatsNotOK() {
+		final LocalDateTime dt = LocalDateTime.of(LocalDate.of(2019, 1, 17), LocalTime.of(17, 7));
+		assertThat(dt.format(DateTimeFormatter.ISO_ZONED_DATE_TIME), is("2019-01-17"));
+	}
+	
+	@Test
+	public void testLocalDateTimeFormatWithOffset() {
+		OffsetDateTime dt = LocalDateTime.of(LocalDate.of(2019, 1, 17), LocalTime.of(17, 7)).atOffset(ZoneOffset.UTC);
+		assertThat(dt.format(DateTimeFormatter.ISO_ZONED_DATE_TIME), is("2019-01-17T17:07:00Z"));
+	}
+	
+
+	
+	@Test
+	public void testLocalDateTimeFormatWithOffset2() {
+		OffsetDateTime dt = LocalDateTime.of(LocalDate.of(2019, 1, 17), LocalTime.of(17, 7)).atOffset(ZoneOffset.UTC);
+		assertThat(dt.format(DateTimeFormatter.ISO_DATE), is("2019-01-17Z"));
+	}
+	
+	@Test
+	public void testLocalDateTimeFormatWithOffset3() {
+		LocalDateTime ldt = LocalDateTime.of(LocalDate.of(2019, 1, 17), LocalTime.of(17, 7));
+		OffsetDateTime odt = ldt.atOffset(ZoneOffset.ofHoursMinutes(1, 30));
+		assertThat(odt.format(DateTimeFormatter.ISO_DATE), is("2019-01-17+01:30"));
+		assertThat(odt.format(DateTimeFormatter.ISO_LOCAL_DATE), is("2019-01-17"));
+		assertThat(odt.format(DateTimeFormatter.BASIC_ISO_DATE), is("20190117+0130"));
+		assertThat(odt.format(DateTimeFormatter.ISO_ZONED_DATE_TIME), is("2019-01-17T17:07:00+01:30"));
+		assertThat(odt.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME), is("2019-01-17T17:07:00"));
+	}
+	
+	@Test
+	public void testLocalDateTimeFormatWithZone() {
+		LocalDateTime ldt = LocalDateTime.of(LocalDate.of(2019, 1, 17), LocalTime.of(17, 7));
+		ZonedDateTime dt = ldt.atZone(ZoneId.of("Europe/Paris"));
+		assertThat(dt.format(DateTimeFormatter.ISO_ZONED_DATE_TIME), is("2019-01-17T17:07:00+01:00[Europe/Paris]"));
+		
+		ZonedDateTime dt2 = ldt.atZone(ZoneId.of("UTC"));
+		assertThat(dt2.format(DateTimeFormatter.ISO_ZONED_DATE_TIME), is("2019-01-17T17:07:00Z[UTC]"));
+	}
+	
+	@Test
 	public void testInstant() {
 		Instant instant = Instant.now();
 		Instant instant2 = Instant.MAX;
@@ -231,6 +286,19 @@ public class Localization {
 	}
 	
 	@Test
+	public void testPeriod2() {
+		Period p = Period.parse("P1Y");
+		assertThat(p.getMonths(), is(0));
+		assertThat(p.getYears(), is(1));
+		assertThat(p.getDays(), is(0));
+	}
+	
+	@Test
+	public void testPeriod3() {
+		Period p = Period.parse("P1Y");
+	}
+	
+	@Test
 	public void testDuration() {
 		LocalDateTime now = LocalDateTime.now();
 		for(int i = 0; i < 1000000; ++i);
@@ -244,6 +312,16 @@ public class Localization {
 		
 		Duration durDiff2 = Duration.between(epoch, instantNow);
 		System.out.println("Duration Difference 2: " + durDiff2);
+	}
+	
+	@Test
+	public void testDuration2() {
+		Duration d = Duration.parse("P2DT3H4M");
+		
+		// d.get() can only take ChronoUnit.SECONDS or NANOS
+		//System.out.println(3 * 3600 + 4 * 60 + 2 * 24 * 60 * 60);
+		assertThat(d.get(ChronoUnit.SECONDS), is(2L * 24 * 60 * 60 + 3 * 3600 + 4 * 60));
+		assertThat(d.get(ChronoUnit.NANOS), is(0L));
 	}
 	
 	@Test
@@ -264,6 +342,8 @@ public class Localization {
 		
 		ZoneId.SHORT_IDS.entrySet().forEach(e -> System.out.printf("%s = %s%n", e.getKey(), e.getValue()));
 	}
+	
+
 }
 
 
