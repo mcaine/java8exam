@@ -175,4 +175,25 @@ public class TemporalUnitTest {
         zonedDateTime = ZonedDateTime.now(zone);
         System.out.println(zonedDateTime);
     }
+
+    @Test
+    public void testTemporalAdjusters() {
+        LocalDate d1 = LocalDate.of(2017, Month.NOVEMBER, 28);
+        System.out.print(d1 + ", "); // 2017-11-28
+
+        LocalDate d2 = d1.with(TemporalAdjusters.lastDayOfYear());
+        System.out.print(d2 + ", "); // 2017-12-31
+
+        LocalDate d3 = d1.plusDays(3).with(TemporalAdjusters.firstDayOfNextMonth());
+        System.out.print(d3 + ", "); // 2018-01-01
+
+        LocalDate d4 = d1.minusMonths(11).with(TemporalAdjusters.firstDayOfNextYear());
+        System.out.print(d4 + ", "); // 2017-01-01
+
+        LocalDate d5 = LocalDate.ofEpochDay(d1.plusDays(27).toEpochDay());
+        System.out.print(d5 + ", "); // 2017-12-25
+
+        LocalDate d6 = d1.minus(Period.ofDays(5));
+        System.out.print(d6 + ", "); // 2017-11-23
+    }
 }
