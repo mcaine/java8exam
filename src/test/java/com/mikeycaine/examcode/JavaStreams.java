@@ -2,20 +2,10 @@ package com.mikeycaine.examcode;
 
 import static org.junit.Assert.*;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-import java.util.OptionalDouble;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
-import java.util.function.DoubleConsumer;
-import java.util.function.LongPredicate;
-import java.util.function.ObjIntConsumer;
-import java.util.function.Predicate;
-import java.util.function.Supplier;
+import java.util.function.*;
 import java.util.stream.Collectors;
 import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
@@ -158,15 +148,6 @@ public class JavaStreams {
 
 		// sum() and average() are defined only on the primitive stream types.
 
-		// Primitive type Streams
-		IntStream intStream = IntStream.empty();
-		IntStream intStream2 = IntStream.of(1,2,3);
-
-		OptionalDouble isa = intStream.average(); // java.util.OptionalDouble
-		assertFalse(isa.isPresent());
-		
-		int ist = intStream2.sum();
-		
 		java.util.function.DoubleConsumer dblConsumer = (double d) -> System.out.println(d);
 		DoubleConsumer dblConsumer2 = new DoubleConsumer() {
 			@Override
@@ -174,8 +155,48 @@ public class JavaStreams {
 				System.out.println("Consumer 2:" + d2);
 			}
 		};
-		
+
+		// Doesnt compile
+		//DoubleConsumer dblConsumer3 = System.out.println;
+
+		// Primitive type Streams
+		IntStream intStream = IntStream.empty();
+
+
+		OptionalDouble isa = intStream.average(); // java.util.OptionalDouble
+
+		// java.lang.IllegalStateException: stream has already been operated upon or closed
+		// int iss = intStream.sum();
+
+		assertFalse(isa.isPresent());
 		isa.ifPresent(dblConsumer);
+		isa.ifPresent(dbl -> System.out.println("THIS WONT HAPPEN: " + dbl));
+
+		// Can't do this
+		//DoubleStream doubleStream = Stream.of(3.141, 2.718, 1.414);
+
+		DoubleStream doubleStream = DoubleStream.of(3.141, 2.718, 1.414);
+
+		LongStream longStream = LongStream.of(1, 2, 3);
+
+
+		// Can't do this
+		// LongStream longStream3 = IntStream.of(1, 2, 3);
+
+		OptionalDouble lsa = longStream.average();
+
+
+		long lss = LongStream.of(1L, 2, 3L).sum();
+
+		LongPredicate lp = (long l) -> l > 2;
+		LongConsumer lc = l -> System.out.println("FOO " + l);
+		LongStream longStream2 = LongStream.of(1L, 2, 3L);
+		longStream2.filter(lp).forEach(lc); // FOO 3
+
+
+
+
+
 	}
 	
 	@Test
@@ -213,15 +234,15 @@ public class JavaStreams {
 		assertTrue(isPrime.test(5));
 		assertFalse(isPrime.test(6));
 
-		long maxValue = 20_000_000;
+		final long MAX_VALUE = 20_000_000;
 
 		long start = System.currentTimeMillis();
-		long numOfPrimes = LongStream.rangeClosed(2, maxValue).filter(isPrime).count();
+		long numOfPrimes = LongStream.rangeClosed(2, MAX_VALUE).filter(isPrime).count();
 		long end = System.currentTimeMillis();
 		System.out.println("Found " + numOfPrimes + " primes in " + (end - start) / 1000.0 + " seconds");
 
 		start = System.currentTimeMillis();
-		numOfPrimes = LongStream.rangeClosed(2, maxValue).parallel().filter(isPrime).count();
+		numOfPrimes = LongStream.rangeClosed(2, MAX_VALUE).parallel().filter(isPrime).count();
 		end = System.currentTimeMillis();
 		System.out
 				.println("Parallel search found " + numOfPrimes + " primes in " + (end - start) / 1000.0 + " seconds");
