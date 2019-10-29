@@ -156,13 +156,11 @@ public class JavaStreams {
 			}
 		};
 
-		// Doesnt compile
-		//DoubleConsumer dblConsumer3 = System.out.println;
+		DoubleConsumer dblConsumer3 = d -> System.out.println(d);
+		DoubleConsumer dblConsumer4 = System.out::println;
 
 		// Primitive type Streams
 		IntStream intStream = IntStream.empty();
-
-
 		OptionalDouble isa = intStream.average(); // java.util.OptionalDouble
 
 		// java.lang.IllegalStateException: stream has already been operated upon or closed
@@ -270,5 +268,20 @@ public class JavaStreams {
 		originalString = str2.reduce((a, b) -> a + " " + b);
 		end = System.currentTimeMillis();
 		System.out.println("Non-parallel took " + (end - start) / 1000.0 + " seconds");
+	}
+
+	@Test
+	public void testMaps() {
+		Stream<Integer> myInts = Stream.iterate(1, i -> i + 1).limit(10);
+
+		// Streams have mapTo{Int,Long,Double} and flatMapTo{Int,Long,Double} but NO ..ToObj
+		myInts.mapToInt(i -> i * 2).forEach(System.out::println);
+	}
+
+	@Test
+	public void testMaps2() {
+		IntStream is = IntStream.rangeClosed(1, 10);
+		IntFunction<String> f = i -> String.valueOf(i);
+		is.mapToObj(f).forEach(System.out::println);
 	}
 }
