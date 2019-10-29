@@ -213,6 +213,23 @@ public class JavaStreams {
 	}
 
 	@Test
+	public void testFind() {
+		Stream<String> words = Stream.of("Here", "are", "some", "words");
+
+		// findAny() takes no parameters
+		Optional<String> something = words.findAny();
+
+		// this would get
+		// java.lang.IllegalStateException: stream has already been operated upon or closed
+		// boolean result = words.anyMatch(s -> s.startsWith("w"));
+
+		Stream<String> words2 = Stream.of("Here", "are", "some", "words");
+		boolean result = words2.anyMatch(s -> s.startsWith("w"));
+		assertTrue(result);
+
+	}
+
+	@Test
 	public void testParallel() {
 		LongPredicate isPrime = new LongPredicate() {
 			@Override
