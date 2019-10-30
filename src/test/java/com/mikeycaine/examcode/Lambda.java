@@ -255,4 +255,16 @@ public class Lambda {
 		OptionalDouble optDouble = OptionalDouble.of(Math.E);
 	}
 
+	@Test
+	public void testFilterOptional() {
+		int i = 123;
+		Optional<Integer> myOpt = Optional.of(i);
+
+
+		Optional<Integer> result = myOpt.filter(a -> a > 1e6);
+		System.out.println("result is " + result);
+
+		Optional<Integer> result2 = myOpt.filter(a -> a > 1);
+	}
+
 }

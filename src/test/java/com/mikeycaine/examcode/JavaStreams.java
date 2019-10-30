@@ -403,4 +403,50 @@ public class JavaStreams {
 		IntFunction<String> f = i -> String.valueOf(i);
 		is.mapToObj(f).forEach(System.out::println);
 	}
+
+	@Test
+	public void testMax() {
+		Stream<Integer> myInts = Stream.of(1, 2, 3, 69, 420, 31337);
+
+		// can't do this, we need a Comparator
+		// myInts.max()
+		// myInts.min()
+
+		Optional<Integer> max = Stream.of(1, 2, 3, 69, 420, 31337).max(Comparator.naturalOrder());
+		Optional<Integer> max2 = Stream.of(1, 2, 3, 69, 420, 31337).max((a, b) -> a - b);
+
+		System.out.println("max is " + max); // max is Optional[31337]
+		System.out.println("max2 is " + max2); // max2 is Optional[31337]
+	}
+
+	@Test
+	public void testMax2() {
+		Stream<String> myStrings = Stream.of("one", "two", "three", "four", "five");
+		Optional<String> min = myStrings.max(Comparator.reverseOrder());
+		System.out.println("min is " + min); // min is Optional[five]
+	}
+
+	@Test
+	public void testMaxPrimitives() {
+		IntStream myInts = IntStream.of(1, 2, 3, 69, 747, 420);
+
+		// we don't take a Comparator
+		OptionalInt max = myInts.max();
+	}
+
+	@Test
+	public void testOptionalMap() {
+		Optional<Integer> optInt = Optional.of(31337);
+
+		Optional<Long> optLong = optInt.map(i -> (long)i);
+		Optional<Long> optLong2 = optInt.map(i -> Long.valueOf(i));
+		// Optional<Long> optLong3 = optInt.map(i -> i); // not allowed
+
+		OptionalInt maybeInt = OptionalInt.of(747);
+		// no map on optionals of primitive types
+		//OptionalLong maybeLong = maybeInt.map(i -> (long)i);
+	}
+
+
+
 }
