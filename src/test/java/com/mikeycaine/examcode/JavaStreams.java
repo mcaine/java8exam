@@ -132,12 +132,55 @@ public class JavaStreams {
 				(String a, String b) -> a + ":" + b
 		));
 		System.out.println(myMap3); // {s=six:seven, t=two:three, f=four:five, o=one}
+	}
 
+	@Test
+	public void testCollectPartitioningBy() {
+		Map<Boolean, List<Boolean>> result = Stream.of(true).collect(Collectors.partitioningBy(b -> b));
+		System.out.println(result); // {false=[], true=[true]}
 
+		Map<Boolean, List<String>> result2 = Stream.of("a", "one", "two", "b", "three", "c").collect(Collectors.partitioningBy(s -> s.length() <= 1));
+		System.out.println(result2); // {false=[one, two, three], true=[a, b, c]}
+	}
 
+	@Test
+	public void testStreamCollections() {
+		Set<String> mySet = new HashSet<>();
+		mySet.add("one");
+		mySet.add("onex");
 
+		List<String> myList = new ArrayList<>();
+		myList.add("two");
+		myList.add("twox");
 
+		Deque<String> myDeque = new ArrayDeque<>();
+		myDeque.add("three");
+		myDeque.add("threex");
 
+		// a stream of Collection<String>
+		Stream<Collection<String>> colStream = Stream.of(mySet, myList, myDeque);
+
+		// likewise. don't be fooled, this is not the same as mySet.stream()
+		Stream<Collection<String>> colStream2 = Stream.of(mySet);
+
+		Stream.of(mySet, myList, myDeque).forEach(System.out::print); //[onex, one][two, twox][three, threex]
+		System.out.println();
+		Stream.of(mySet, myList, myDeque).flatMap(c -> c.stream()).forEach(System.out::print); // onexonetwotwoxthreethreex
+	}
+
+	@Test
+	public void streamMaps() {
+		Map<String, Integer> things = new HashMap<>();
+		things.put("a", 4);
+		things.put("b", 8);
+		things.put("c", 16);
+		things.put("d", 32);
+
+		//things.stream() // can't stream Maps, won't compile
+
+		// can stream the Map's entry set though
+		List<String> myList = things.entrySet().stream().map(entry -> entry.getKey() + "=>" + entry.getValue()).collect(Collectors.toList());
+		System.out.println(myList); // [a=>4, b=>8, c=>16, d=>32]
 	}
 
 	@Test
@@ -150,8 +193,17 @@ public class JavaStreams {
 		DoubleStream doubleStream4 = DoubleStream.of(1L, 2l);
 		DoubleStream doubleStream5 = DoubleStream.of(1L, 2.34);
 
+		DoubleSummaryStatistics stats = doubleStream.summaryStatistics();
+		double ave = stats.getAverage();
+
 		// java.util.stream.IntStream
-		IntStream intStream = IntStream.of(1, 2, 3);
+		IntStream intStream = IntStream.of(1, 2, 4);
+		IntSummaryStatistics intStats = intStream.summaryStatistics();
+		double intAve = intStats.getAverage();
+		System.out.println("intAve is " + intAve); // intAve is 2.3333333333333335
+
+		IntSummaryStatistics emptyStats = IntStream.empty().summaryStatistics();
+		System.out.println("emptyStats ave is " + emptyStats.getAverage());  // emptyStats ave is 0.0
 
 		// java.util.stream.LongStream
 		LongStream longStream = LongStream.of(1L, 2L, 3L);
