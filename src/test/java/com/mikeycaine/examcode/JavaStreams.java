@@ -91,6 +91,50 @@ public class JavaStreams {
 	}
 
 	@Test
+	public void testGet() {
+		Optional<Double> od = Optional.of(Math.PI);
+		System.out.println(od.get());
+
+		OptionalDouble od2 = OptionalDouble.of(Math.E);
+		System.out.println(od2.getAsDouble());
+
+		OptionalInt oi = OptionalInt.of(31337);
+		System.out.println(oi.getAsInt());
+
+		OptionalLong ol = OptionalLong.of(69420);
+		System.out.println(ol.getAsLong());
+	}
+
+	@Test
+	public void testCollect2() {
+		List<String> myList = Stream.of("one", "two", "three", "four").collect(Collectors.toList());
+		Set<String> mySet = Stream.of("one", "two", "three", "four").collect(Collectors.toSet());
+
+		String result = Stream.of("one", "two", "three", "four").collect(Collectors.joining(","));
+		System.out.println(result); // one,two,three,four
+
+		// toCollection takes a Supplier of an empty Collection
+		ArrayList<String> myArrayList = Stream.of("one", "two", "three", "four").collect(Collectors.toCollection(() -> new ArrayList<String>()));
+
+		// toMap taking key and value function
+		Map<Character, String> myMap = Stream.of("one", "two", "four", "six").collect(Collectors.toMap(s -> s.charAt(0), s -> s));
+		System.out.println(myMap); // {s=six, t=two, f=four, o=one}
+
+		// This would have duplicate keys, leading to java.lang.IllegalStateException: Duplicate key t (attempted merging values two and three)
+		//Map<Character, String> myMap = Stream.of("one", "two", "four", "six").collect(Collectors.toMap(s -> s.charAt(0), s -> s));
+
+		Map<Character, List<String>> myMap2 = Stream.of("one", "two", "three", "four", "five", "six", "seven").collect(Collectors.groupingBy(s -> s.charAt(0)));
+		System.out.println(myMap2); // {s=[six, seven], t=[two, three], f=[four, five], o=[one]}
+
+
+
+
+
+
+
+	}
+
+	@Test
 	public void testStreamPrimitives() {
 
 		// java.util.stream.DoubleStream
