@@ -126,6 +126,12 @@ public class JavaStreams {
 		Map<Character, List<String>> myMap2 = Stream.of("one", "two", "three", "four", "five", "six", "seven").collect(Collectors.groupingBy(s -> s.charAt(0)));
 		System.out.println(myMap2); // {s=[six, seven], t=[two, three], f=[four, five], o=[one]}
 
+		Map<Character, String> myMap3 = Stream.of("one", "two", "three", "four", "five", "six", "seven").collect(Collectors.toMap(
+				s -> s.charAt(0),
+				Function.identity(),
+				(String a, String b) -> a + ":" + b
+		));
+		System.out.println(myMap3); // {s=six:seven, t=two:three, f=four:five, o=one}
 
 
 
