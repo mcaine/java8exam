@@ -290,7 +290,16 @@ public class Concurrency {
 	// Phaser is a useful feature when few independent threads have to work in phases to complete a task.
 	@Test
 	public void testPhaser() {
-		
+		Phaser phaser = new Phaser();
+		int phase = phaser.getPhase();
+		assertEquals(0, phase);
+	}
+
+	// java.lang.IllegalStateException: Attempted arrival of unregistered party
+	@Test(expected = IllegalStateException.class)
+	public void testPhaserUnregistered() {
+		Phaser phaser = new Phaser();
+		phaser.arrive();
 	}
 	
 	@Test
