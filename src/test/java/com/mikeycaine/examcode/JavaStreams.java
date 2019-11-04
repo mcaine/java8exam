@@ -195,6 +195,10 @@ public class JavaStreams {
 
 		DoubleSummaryStatistics stats = doubleStream.summaryStatistics();
 		double ave = stats.getAverage();
+		long count = stats.getCount();
+		double minimum = stats.getMin();
+		double sum = stats.getSum();
+
 
 		// java.util.stream.IntStream
 		IntStream intStream = IntStream.of(1, 2, 4);
@@ -446,6 +450,35 @@ public class JavaStreams {
 		// no map on optionals of primitive types
 		//OptionalLong maybeLong = maybeInt.map(i -> (long)i);
 	}
+
+	@Test
+	public void testGenerate() {
+		class Counter {
+			int count = 0;
+			int getCount() {
+				return ++count;
+			}
+		}
+
+		List<Integer> items = Stream.generate(new Counter()::getCount).limit(10).collect(Collectors.toList());
+		System.out.println(items); // [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+	}
+
+	@Test
+	public void testIterate() {
+		List<Integer> items = Stream.iterate(1, i -> i * 2).limit(10).collect(Collectors.toList());
+		System.out.println(items); // [1, 2, 4, 8, 16, 32, 64, 128, 256, 512]
+	}
+
+	@Test
+	public void testFindFirst() {
+		Stream<Integer> myInts = Stream.of(1, 2, 3, 4, 5, 6, 7);
+		Optional<Integer> maybeFirst = myInts.findFirst();
+
+		IntStream myIntStream = IntStream.of(1, 2, 3, 4, 5, 6, 7);
+		OptionalInt mightBeFirst = myIntStream.findFirst();
+	}
+
 
 
 

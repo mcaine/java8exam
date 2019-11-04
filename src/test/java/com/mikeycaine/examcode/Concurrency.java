@@ -2,26 +2,19 @@ package com.mikeycaine.examcode;
 
 import static org.junit.Assert.*;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.BrokenBarrierException;
-import java.util.concurrent.Callable;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.CyclicBarrier;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.Future;
-import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicIntegerArray;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import org.junit.Test;
 
@@ -29,7 +22,7 @@ public class Concurrency {
 	// Create worker threads using Runnable, Callable, and use an ExecutorService to concurrently execute tasks
 	@Test
 	public void testRunnable() throws InterruptedException {
-		final List<String> myStrings = new ArrayList<String>();
+		final List<String> myStrings = new ArrayList<>();
 		Runnable r = () -> { myStrings.add("Hello!"); };
 		Thread t = new Thread(r);
 		t.start();
@@ -125,17 +118,118 @@ public class Concurrency {
 	}
 	
 	// Use java.util.concurrent collections and classes including CyclicBarrier and CopyOnWriteArrayList
-	
+
+
+
 	// A Semaphore controls access to shared resources. A semaphore maintains a counter to specify number of resources that the semaphore controls.
 	@Test
 	public void testSemaphore() {
-		
+		class Waiter {
+
+			final private String id;
+			final private Semaphore semaphore;
+
+			Waiter(String id, Semaphore semaphore) {
+				this.id = id;
+				this.semaphore = semaphore;
+			}
+
+			public Callable<String> threadInfo() {
+				return () -> {
+					System.out.println(id + " getting semaphore...");
+					semaphore.acquire();
+					System.out.println("..." + id + " got semaphore...");
+					Thread.sleep(20L);
+					System.out.println(id + " releasing semaphore");
+					semaphore.release();
+					return id + " -> " + ThreadLocalRandom.current().nextInt(1000) + ", " + Thread.currentThread().getName();
+				};
+			}
+		}
+
+		Semaphore sem = new Semaphore(1);
+		List<Callable<String>> callables = IntStream.range(1, 10).mapToObj(Integer::new)
+				.map(i ->  new Waiter("ID" + i, sem).threadInfo())
+				.collect(Collectors.toList());
+
+		ExecutorService es = Executors.newFixedThreadPool(10);
+
+		List<Future<String>> results = callables.stream().map( c -> es.submit(c)).collect(Collectors.toList());
+
+		results.forEach(res -> {
+			try {
+				res.get();
+			} catch (InterruptedException| ExecutionException e) {
+				e.printStackTrace();
+			}
+		});
+
+		try {
+			results.forEach(res -> {
+				try {
+					String result = res.get();
+					System.out.println("Got result " + result);
+				} catch (InterruptedException | ExecutionException ex ) {
+					ex.printStackTrace();
+				}
+			});
+		} catch (Exception ie) {
+			System.out.println(ie.getMessage());
+		}
+
+		es.shutdown();
+		try {
+			es.awaitTermination(6, TimeUnit.SECONDS );
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+
+		System.out.println("Done");
+
+
 	}
+	
+
 	
 	// CountDownLatch allows one or more threads to wait for a countdown to complete.
 	@Test
 	public void testCountDownLatch() {
-		
+		CountDownLatch cdl = new CountDownLatch(3);
+
+		try {
+			boolean result = cdl.await(1, TimeUnit.NANOSECONDS);
+			assertFalse(result);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+	}
+
+	@Test
+	public void testCountDownLatch2() {
+		CountDownLatch cdl = new CountDownLatch(100);
+
+		ExecutorService es = Executors.newFixedThreadPool(10);
+		IntStream.rangeClosed(1,100).forEach(i -> es.submit(() -> {
+			System.out.println(Thread.currentThread().getName() + " counting down...");
+			cdl.countDown();
+		}));
+
+		try {
+			cdl.await();
+			System.out.println("Count is " + cdl.getCount());
+			assertEquals(0, cdl.getCount());
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+			fail();
+		}
+
+		es.shutdown();
+		try {
+			es.awaitTermination(6, TimeUnit.SECONDS );
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		System.out.println("DONE");
 	}
 	
 	// The Exchanger class is meant for exchanging data between two threads. This class is useful when two threads need to synchronize between each other and continuously exchange data.
@@ -265,3 +359,5 @@ public class Concurrency {
 		
 	}
 }
+
+
