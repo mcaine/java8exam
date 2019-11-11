@@ -50,6 +50,52 @@ public class JavaStreams {
 	}
 
 	@Test
+	public void testSlowPeek() {
+		IntConsumer slowPeek = (int i) -> {
+			try {
+				Thread.sleep(10000L);
+				System.out.println("Peeked and got " + i);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		};
+
+		IntStream.rangeClosed(1,10).peek(slowPeek).forEach(System.out::println);
+	}
+
+	@Test
+	public void testCollect3() {
+
+		// Objects
+		Stream<Integer> ints = Stream.iterate(new Integer(1), i -> i + 1).limit(10);
+		List<Integer> result = ints.collect(Collectors.toList());
+		System.out.println(result);
+
+		// Primitives
+		IntStream is = IntStream.rangeClosed(1, 10);
+		// Can't do this
+		//result2 = is.collect(Collectors.toList());
+		// have to do
+		Supplier<List<Integer>> supplier = () -> new ArrayList<Integer>();
+		ObjIntConsumer<List<Integer>> accumulator = (List<Integer> list, int i) -> list.add(new Integer(i));
+		BiConsumer<List<Integer>, List<Integer>> combiner = (List<Integer> a, List<Integer> b) -> {
+			System.out.println("Called combiner");
+			a.addAll(b);
+		};
+		List<Integer> result2 = is.collect(supplier, accumulator, combiner);
+		System.out.println(result2);
+	}
+
+	@Test
+	public void testParallel2() {
+		Stream<Integer> ints = Stream.iterate(new Integer(1), i -> i + 1).limit(10);
+		Stream<Integer> p = ints.parallel();
+
+		IntStream is = IntStream.range(1, 10);
+		IntStream p2 = is.parallel();
+	}
+
+	@Test
 	public void testArraysStream() {
 		Object[] array = { 1, 2, "three", "four" };
 		Stream<Object> x = Arrays.stream(array);
@@ -181,6 +227,16 @@ public class JavaStreams {
 		// can stream the Map's entry set though
 		List<String> myList = things.entrySet().stream().map(entry -> entry.getKey() + "=>" + entry.getValue()).collect(Collectors.toList());
 		System.out.println(myList); // [a=>4, b=>8, c=>16, d=>32]
+	}
+	@Test
+	public void foreachMaps() {
+		Map<String, Integer> things = new HashMap<>();
+		things.put("a", 4);
+		things.put("b", 8);
+		things.put("c", 16);
+		things.put("d", 32);
+
+		things.forEach((k,v) -> System.out.println("Key: " + k + ", Val: " + v));
 	}
 
 	@Test

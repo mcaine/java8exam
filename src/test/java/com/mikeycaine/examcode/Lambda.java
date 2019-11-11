@@ -65,6 +65,11 @@ public class Lambda {
 		result = (List<String>) Stream.of("Nasty", "NASTY", "lower", "nasty", "nice").filter(isLowerCaseNasty).collect(Collectors.toList());
 		assertTrue(result.size() == 1);
 		assertTrue(result.contains("nasty"));
+
+		MyStringPredicate mine = (String s) -> s.equalsIgnoreCase("mikey");
+		assertTrue(mine.test("Mikey"));
+
+		Stream.of("mikey", "Fran", "Fluff", "mIkEy").filter(mine).forEach(System.out::println);
 	}
 	
 	@Test
@@ -266,5 +271,8 @@ public class Lambda {
 
 		Optional<Integer> result2 = myOpt.filter(a -> a > 1);
 	}
+
+	@FunctionalInterface
+	interface MyStringPredicate extends Predicate<String> {};
 
 }
