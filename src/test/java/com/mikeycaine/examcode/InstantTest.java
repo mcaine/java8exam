@@ -67,10 +67,16 @@ public class InstantTest {
 		Instant instant = Instant.ofEpochSecond(981_000_000L);
 		
 		LocalDateTime ldt = LocalDateTime.ofInstant(instant, ZoneOffset.UTC);
-		LocalDateTime ldt2 = LocalDateTime.ofInstant(instant, ZoneOffset.ofHours(1));
-		
 		assertThat(ldt.format(DateTimeFormatter.ISO_DATE_TIME), is("2001-02-01T04:00:00"));
+
+		LocalDateTime ldt2 = LocalDateTime.ofInstant(instant, ZoneOffset.ofHours(1));
 		assertThat(ldt2.format(DateTimeFormatter.ISO_DATE_TIME), is("2001-02-01T05:00:00"));
+
+		// java.time.temporal.UnsupportedTemporalTypeException: Unsupported field: OffsetSeconds
+		//assertThat(ldt2.format(DateTimeFormatter.ISO_ZONED_DATE_TIME), is("2001-02-01T05:00:00+01:00[Europe/Paris]"));
+
+		ZonedDateTime zdt = ZonedDateTime.ofInstant(instant, ZoneId.of("Europe/Paris"));
+		assertThat(zdt.format(DateTimeFormatter.ISO_ZONED_DATE_TIME), is("2001-02-01T05:00:00+01:00[Europe/Paris]"));
 		
 	}
 }

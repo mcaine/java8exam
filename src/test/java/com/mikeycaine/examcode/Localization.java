@@ -37,7 +37,7 @@ public class Localization {
 //  Format dates, numbers, and currency values for localization with the NumberFormat and DateFormat classes, including number and date format patterns
 //  Work with dates and times across time zones and manage changes resulting from daylight savings
 	
-	public void printLocaleDetails(Locale locale) {
+	public static void printLocaleDetails(Locale locale) {
 		System.out.println();
 		System.out.println("Locale: " + locale);
 		System.out.println("Language: " + locale.getLanguage() + " " + locale.getDisplayLanguage());

@@ -6,14 +6,11 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.*;
-import java.util.stream.Collectors;
-import java.util.stream.DoubleStream;
-import java.util.stream.IntStream;
-import java.util.stream.LongStream;
-import java.util.stream.Stream;
+import java.util.stream.*;
 
 import javax.xml.transform.stream.StreamSource;
 
+import javafx.geometry.Insets;
 import org.junit.Test;
 
 import static org.hamcrest.core.Is.*;
@@ -465,6 +462,56 @@ public class JavaStreams {
 	}
 
 	@Test
+	public void testMaps3() {
+		DoubleStream ds = DoubleStream.iterate(1.0, d -> d + 1 ).limit(10);
+		DoubleStream ds2 = ds.map(d -> d * d);
+		ds2.forEach(System.out::println);
+	}
+
+	@Test
+	public void testMaps4() {
+		IntStream is = IntStream.rangeClosed(1, 10);
+		DoubleStream ds2 = is.mapToDouble(i -> i * i);
+		ds2.forEach(System.out::println);
+	}
+
+	@Test
+	public void testCollect4() {
+		Stream<String> myStream = Stream.of("cat", "dog", "lion", "giraffe", "hedgehog");
+
+		Collector<String, String, String> collector = new Collector<String, String, String>() {
+
+			@Override
+			public Supplier<String> supplier() {
+				return () -> "";
+			}
+
+			@Override
+			public BiConsumer<String, String> accumulator() {
+				return (a,b) -> System.out.println("Consuming " + a + " and " + b);
+			}
+
+			@Override
+			public BinaryOperator<String> combiner() {
+				return (a,b) -> "Combining " + a + " and " + b;
+			}
+
+			@Override
+			public Function<String, String> finisher() {
+				return a -> "[" + a + "]";
+			}
+
+			@Override
+			public Set<Characteristics> characteristics() {
+				return new HashSet<>();
+			}
+		};
+
+		String result = myStream.collect(collector);
+		System.out.println(result);
+	}
+
+	@Test
 	public void testMax() {
 		Stream<Integer> myInts = Stream.of(1, 2, 3, 69, 420, 31337);
 
@@ -535,6 +582,26 @@ public class JavaStreams {
 		OptionalInt mightBeFirst = myIntStream.findFirst();
 	}
 
+	@Test
+	public void testFlatMap() {
+		IntStream ints = IntStream.of(1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144);
+		IntStream twice = ints.flatMap( i -> IntStream.of(i,i));
+		twice.forEach(System.out::println);
+	}
+
+	@Test
+	public void testFlatMap2() {
+		DoubleStream doubles = DoubleStream.of(Math.PI, Math.E, 69, 747);
+		DoubleStream doubleStream = doubles.flatMap(d -> DoubleStream.of(d,d));
+		doubleStream.forEach(System.out::println);
+	}
+
+	@Test
+	public void testFlatMap3() {
+		Stream<Integer> objs = Stream.of(1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144);
+		DoubleStream dbls = objs.flatMapToDouble(i -> DoubleStream.of(i, i/3.0));
+		dbls.forEach(System.out::println);
+	}
 
 
 

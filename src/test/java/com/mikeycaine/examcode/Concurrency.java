@@ -2,16 +2,15 @@ package com.mikeycaine.examcode;
 
 import static org.junit.Assert.*;
 
+import java.io.IOException;
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicIntegerArray;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.locks.*;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -19,6 +18,147 @@ import java.util.stream.IntStream;
 import org.junit.Test;
 
 public class Concurrency {
+
+	// Use classes from the java.util.concurrent package including CyclicBarrier and CopyOnWriteArrayList with a focus on the advantages over and differences from the traditional java.util collections
+
+	//Use Lock, ReadWriteLock, and ReentrantLock classes in the java.util.concurrent.locks and java.util.concurrent.atomic packages to support lock-free thread-safe programming on single variables
+
+	@Test
+	public void testLockInterface() {
+		Lock myLock = new Lock() {
+			@Override
+			public void lock() { }
+
+			@Override
+			public void lockInterruptibly() throws InterruptedException { }
+
+			@Override
+			public boolean tryLock() { return false; }
+
+			@Override
+			public boolean tryLock(long time, TimeUnit unit) throws InterruptedException { return false; }
+
+			@Override
+			public void unlock() { }
+
+			@Override
+			public Condition newCondition() { return null; }
+		};
+	}
+
+	@Test public void testLockImplementations() {
+		Lock lock = new ReentrantLock();
+
+		StampedLock stampedLock = new StampedLock();
+		Lock readLock = stampedLock.asReadLock();
+		Lock writeLock = stampedLock.asWriteLock();
+
+		ReadWriteLock readWriteLock = new ReentrantReadWriteLock();
+		Lock readLock2 = readWriteLock.readLock();
+		Lock writeLock2 = readWriteLock.writeLock();
+
+	}
+
+	@Test
+	public void testBlockingQueues() {
+		ArrayBlockingQueue<String> abq = new ArrayBlockingQueue<>(100);
+		LinkedBlockingDeque<String> lbd = new LinkedBlockingDeque<>();
+		LinkedBlockingQueue<String> lbq = new LinkedBlockingQueue<>();
+
+		abq.add("red");
+		abq.offer("blue");
+		abq.add("green");
+		abq.offer("purple");
+
+		List<String> result = abq.stream().collect(Collectors.toList());
+		System.out.println(result); //[red, blue, green, purple]
+
+		lbd.add("red");
+		lbd.push("blue");
+		lbd.add("green");
+		lbd.push("purple");
+
+		result = lbd.stream().collect(Collectors.toList());
+		System.out.println(result); // [purple, blue, red, green]
+	}
+
+	@Test
+	public void testLinkedTransferQueue() {
+		LinkedTransferQueue<String> linkedTransferQueue = new LinkedTransferQueue<>();
+		BlockingQueue<String> blockingQueue = linkedTransferQueue;
+		TransferQueue<String> transferQueue = linkedTransferQueue;
+		Queue queue = linkedTransferQueue;
+	}
+
+	//Use Executor, ExecutorService, Executors, Callable, and Future to execute tasks using thread pools
+	@Test
+	public void testExecutor() {
+		Executor ex = Executors.newCachedThreadPool();
+		ex.execute(()->System.out.println("Hello"));
+	}
+
+	@Test
+	public void testCallableCanThrowCheckedException() {
+
+		class MyCallable implements Callable<Void> {
+			@Override
+			public Void call() throws Exception {
+				throw new IOException("Something");
+				//return null;
+			}
+		}
+
+		ExecutorService es = Executors.newSingleThreadExecutor();
+		Future<Void> result = es.submit(new MyCallable());
+		try {
+			System.out.println("Result " + result.get());
+		} catch (ExecutionException  e) {
+			System.out.println("Caught an ExecutionException: ");
+			System.out.println(e.getMessage());
+			e.printStackTrace();
+		} catch (InterruptedException e) {
+			System.out.println("Caught an InterruptedException: ");
+			System.out.println(e.getMessage());
+			e.printStackTrace();
+		}
+
+	}
+
+	@Test
+	public void testExecutionService() throws ExecutionException, InterruptedException {
+		ExecutorService es = Executors.newSingleThreadExecutor();
+		Future<String> future = es.submit(() -> "Christmas");
+		String result = future.get(); // blocking
+		System.out.println("It's nearly " + result);
+
+		Future<Long> futLong = es.submit(() -> System.out.println("I'm working"), 747L);
+		Long longResult = futLong.get();
+		System.out.println("I got " + longResult);
+
+		List<Future<String>> futString = es.invokeAll(Arrays.asList(
+				() -> "Phineas",
+				() -> "Franklin",
+				() -> "Freddy"
+		));
+
+		futString.forEach(	fut -> {
+			String got = null;
+			try {
+				got = fut.get();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			} catch (ExecutionException e) {
+				e.printStackTrace();
+			}
+			System.out.println("Freak: " + got);
+		});
+
+	}
+
+	//Use the parallel Fork/Join Framework
+
+
+
 	// Create worker threads using Runnable, Callable, and use an ExecutorService to concurrently execute tasks
 	@Test
 	public void testRunnable() throws InterruptedException {
