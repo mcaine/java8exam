@@ -447,6 +447,28 @@ public class JavaStreams {
 	}
 
 	@Test
+	public void testReduce2() {
+		int [] nums = { 1, 2, 3, 4, 5, 69, 420};
+		OptionalInt sum = Arrays.stream(nums).reduce((a,b) -> a + b);
+		System.out.println("sum is " + sum); // sum is OptionalInt[504]
+
+		int [] nums2 = { 1, 2, 3, 4, 5, 69, 420};
+		int sum2 = Arrays.stream(nums).reduce(0, (a,b) -> a + b);
+		System.out.println("sum2 is " + sum2); // sum2 is 504
+	}
+	
+	@Test
+	public void testTypes() {
+		int [] nums = { 1, 2, 3, 4, 5, 69, 420};
+		double [] reals = { Math.E, Math.PI};
+		String [] names = {"Mike", "Fran", "Fluff", "Sophie"};
+
+		IntStream a = Arrays.stream(nums);
+		DoubleStream b = Arrays.stream(reals);
+		Stream<String> c = Arrays.stream(names);
+	}
+
+	@Test
 	public void testMaps() {
 		Stream<Integer> myInts = Stream.iterate(1, i -> i + 1).limit(10);
 

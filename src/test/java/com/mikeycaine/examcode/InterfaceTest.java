@@ -4,6 +4,11 @@ import org.junit.Test;
 
 public class InterfaceTest {
 
+
+    abstract interface MyAbstractInterface {
+        public void myMethod();
+    }
+
     interface MyInterface {
         public void run();
     }
@@ -59,5 +64,41 @@ public class InterfaceTest {
     public void testSuper() {
         Dog dog = new Dog();
         dog.run();
+    }
+
+    interface Red {
+        public void stuff();
+    }
+
+    interface Green {
+        public void stuff();
+    }
+
+    class GreenThing implements Green {
+        public void stuff() {
+            System.out.println("I'm green");
+        }
+    }
+
+    class Coloured extends GreenThing implements Red {}
+
+    @Test
+    public void testColoured() {
+        Red thing = new Coloured();
+        Green greenThing = (Green)thing;
+
+        thing.stuff();
+        greenThing.stuff();
+    }
+
+    @Test
+    public void testMore() {
+
+        // Interface not allowed here
+        //interface Animal {
+        //    public void speak();
+        //}
+
+
     }
 }

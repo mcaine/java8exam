@@ -97,12 +97,15 @@ public class DateTest {
     public void testParse() {
         ZonedDateTime zd = ZonedDateTime.parse("2020-05-04T08:05:00+00:00[Europe/London]");
         System.out.println(zd.getMonth() + " " + zd.getDayOfMonth()); // MAY 4
+
+        DateTimeFormatter formatter = DateTimeFormatter.ISO_ZONED_DATE_TIME;
+        ZonedDateTime zd2 = ZonedDateTime.parse("2020-05-04T08:05:00+00:00[Europe/London]", formatter);
+        System.out.println(zd2.getMonth() + " " + zd2.getDayOfMonth()); // MAY 4
     }
 
     @Test(expected = java.time.format.DateTimeParseException.class)
-    public void testParseNoOffest() {
-        // failse because of missing offset +00:00
+    public void testParseNoOffset() {
+        // fails because of missing offset +00:00
         ZonedDateTime zd = ZonedDateTime.parse("2020-05-04T08:05:00[Europe/London]");
-        //System.out.println(zd.getMonth() + " " + zd.getDayOfMonth()); // MAY 4
     }
 }
