@@ -7,6 +7,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAdjusters;
 import java.time.zone.ZoneOffsetTransition;
 import java.time.zone.ZoneRules;
+import java.util.stream.Stream;
 
 public class DateTest {
 
@@ -43,7 +44,28 @@ public class DateTest {
 
         //System.out.println(formatter.format(inaugTime));  // java.time.temporal.UnsupportedTemporalTypeException: Unsupported field: DayOfMonth
 
+    }
 
+    @Test
+    public void testFormatters() {
+        Instant nowInstant = Instant.now();
+        ZonedDateTime zdt = ZonedDateTime.now();
+
+        Stream.of(
+                "dd-MM-yyyy HH:mm",
+                "d-MMM-yyyy HH:mm",
+                "D-MMM-yyyy HH:mm",
+                "DD-MM-yyyy HH:mm",
+                "dd-MMM-yyyy HH:mm",
+                "dd-MM-yyyy hh:mm a",
+                "dd-MMMM-yyyy HH:mm",
+                "dd-M-yyyy HH:mm"
+        ).forEach(pattern -> {
+            DateTimeFormatter dtf = DateTimeFormatter.ofPattern(pattern);
+            String result = zdt.format(dtf);
+            System.out.println(pattern + "    " + result);
+            System.out.println();
+        });
 
     }
 

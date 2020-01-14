@@ -6,9 +6,17 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.Writer;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.nio.file.spi.FileSystemProvider;
+import java.util.stream.Collectors;
 
 public class JavaFileIO {
 
@@ -17,15 +25,34 @@ public class JavaFileIO {
 	@Test
 	public void testPath() {
 		Path path = Paths.get("c:\\Users\\Mike Caine\\My Documents\\qmds.txt");
+		System.out.println("Path is " + path);
 		System.out.println("\t file name: " + path.getFileName());
 		System.out.println("\t root of the path: " + path.getRoot());
 		System.out.println("\t parent of the target: " + path.getParent());
+
 
 		Path p2 = path.getName(0);
 		assertThat(p2.toString(), is("Users"));
 
 		Path p3 = path.getName(1);
 		assertThat(p3.toString(), is("Mike Caine"));
+
+		Path p4 = path.getName(2);
+		assertThat(p4.toString(), is("My Documents"));
+
+		Path fileName = path.getFileName();
+		Path root = path.getRoot();
+
+		Path parent = path.getParent();
+	}
+
+	@Test
+	public void testPath2() throws MalformedURLException, URISyntaxException {
+
+		URL url = new URL("http://www.website.com/information.asp");
+		URI uri = url.toURI();
+		Path result = Paths.get(uri);
+		System.out.println("result is " + result);
 	}
 
 	// Check, delete, copy, or move a file or directory by using the Files class
@@ -40,6 +67,35 @@ public class JavaFileIO {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+
+	@Test
+	public void testDeleteFile() throws IOException {
+		Path notThere = Paths.get("c:\\Users\\Mike Caine\\My Documents\\not_there.txt");
+
+		if (Files.exists(notThere)) {
+			Files.delete(notThere);
+		}
+
+		assertFalse(Files.exists(notThere));
+
+		Writer writer = new FileWriter(notThere.toFile());
+		writer.write("Heres some text");
+		writer.close();
+
+		assertTrue(Files.exists(notThere));
+
+		Path newName = Paths.get("c:\\Users\\Mike Caine\\deletemeplz.txt");
+		assertFalse(Files.exists(newName));
+
+		Files.move(notThere, newName);
+		assertFalse(Files.exists(notThere));
+		assertTrue(Files.exists(newName));
+
+		Files.delete(newName);
+		assertFalse(Files.exists(newName));
+
+
 	}
 
 	// Recursively access a directory tree by using the DirectoryStream and FileVisitor interfaces
@@ -108,6 +164,12 @@ public class JavaFileIO {
 
 		//WatchKey key = watchService.take();
 
+	}
+
+	@Test
+	public void testFilesystemProviders() {
+		String result = FileSystemProvider.installedProviders().stream().map(fsp -> fsp.getScheme()).collect(Collectors.joining(", "));
+		System.out.println(result); // file, jar
 	}
 
 }

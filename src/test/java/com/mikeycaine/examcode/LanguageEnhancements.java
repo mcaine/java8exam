@@ -100,6 +100,9 @@ public class LanguageEnhancements {
 		
 		double myVal6 = 0_0_0_0_0_0_0.0_0;
 		assertThat(myVal6, is(0.0));
+
+		double myVal7 = .1;
+		System.out.println("myVal7 is " + myVal7); // myVal7 is 0.1
 		
 		 int number1 = 0b0111;
 		 int number2 = 0111_000;

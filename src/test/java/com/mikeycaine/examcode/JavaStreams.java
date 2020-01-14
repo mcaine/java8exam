@@ -1,5 +1,6 @@
 package com.mikeycaine.examcode;
 
+import static java.util.stream.Collectors.toMap;
 import static org.junit.Assert.*;
 
 import java.util.*;
@@ -160,7 +161,7 @@ public class JavaStreams {
 		ArrayList<String> myArrayList = Stream.of("one", "two", "three", "four").collect(Collectors.toCollection(() -> new ArrayList<String>()));
 
 		// toMap taking key and value function
-		Map<Character, String> myMap = Stream.of("one", "two", "four", "six").collect(Collectors.toMap(s -> s.charAt(0), s -> s));
+		Map<Character, String> myMap = Stream.of("one", "two", "four", "six").collect(toMap(s -> s.charAt(0), s -> s));
 		System.out.println(myMap); // {s=six, t=two, f=four, o=one}
 
 		// This would have duplicate keys, leading to java.lang.IllegalStateException: Duplicate key t (attempted merging values two and three)
@@ -169,7 +170,7 @@ public class JavaStreams {
 		Map<Character, List<String>> myMap2 = Stream.of("one", "two", "three", "four", "five", "six", "seven").collect(Collectors.groupingBy(s -> s.charAt(0)));
 		System.out.println(myMap2); // {s=[six, seven], t=[two, three], f=[four, five], o=[one]}
 
-		Map<Character, String> myMap3 = Stream.of("one", "two", "three", "four", "five", "six", "seven").collect(Collectors.toMap(
+		Map<Character, String> myMap3 = Stream.of("one", "two", "three", "four", "five", "six", "seven").collect(toMap(
 				s -> s.charAt(0),
 				Function.identity(),
 				(String a, String b) -> a + ":" + b
@@ -498,6 +499,48 @@ public class JavaStreams {
 	}
 
 	@Test
+	public void testMaps5() {
+		Stream<String> myStream = Stream.of("red", "yellow", "blue");
+
+		DoubleStream ds2 = myStream.mapToDouble(s -> s.length());
+		ds2.forEach(System.out::println); // 3.0 6.0 4.0
+	}
+
+	@Test
+	public void testMaps6() {
+		Stream<String> myStream = Stream.of("red", "yellow", "blue");
+
+		Stream<Integer> ds2 = myStream.map(String::length);
+		ds2.forEach(System.out::println); // 3 6 4
+	}
+
+	@Test
+	public void testMaps7() {
+		Stream<String> myStream = Stream.of("red", "yellow", "blue");
+
+		Stream<Double> ds2 = myStream.map(s -> (double)s.length());
+		ds2.forEach(System.out::println); // 3.0 6.0 4.0
+	}
+
+	@Test
+	public void testMaps8() {
+		Stream<String> myStream = Stream.of("red", "yellow", "blue");
+
+		Stream<Double> ds2 = myStream.map(s -> (double)s.length());
+		ds2.forEach(System.out::println); // 3.0 6.0 4.0
+	}
+
+	@Test
+	public void testMaps9() {
+		Stream<String> myStream = Stream.of("red", "yellow", "blue");
+
+		IntStream ds2 = myStream.mapToInt(s -> s.length());
+		Stream<Integer> ds3 = ds2.boxed();
+		DoubleStream ds4 = ds3.mapToDouble(i -> 0.5 + i);
+		ds4.forEach(System.out::println); // 3.5 6.5 4.5
+	}
+
+	@Test
 	public void testCollect4() {
 		Stream<String> myStream = Stream.of("cat", "dog", "lion", "giraffe", "hedgehog");
 
@@ -625,6 +668,12 @@ public class JavaStreams {
 		dbls.forEach(System.out::println);
 	}
 
+	@Test
+	public void testCollect5() {
+		Stream<String> s = Stream.of("speak", "bark", "meow", "growl");
+		Map<Integer, String> map = s.collect(toMap(String::length, k -> k));
+		System.out.println(map.size() + " " + map.get(4));
+	}
 
 
 }

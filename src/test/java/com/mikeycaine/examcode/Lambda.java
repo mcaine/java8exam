@@ -2,6 +2,7 @@ package com.mikeycaine.examcode;
 
 import static org.junit.Assert.*;
 
+import java.io.File;
 import java.util.*;
 import java.util.function.*;
 import java.util.stream.Collectors;
@@ -107,7 +108,7 @@ public class Lambda {
 		assertTrue(result2.get(0).equals(1));
 		assertTrue(result2.get(1).equals(4));
 		
-		Function<String, Integer> myStringLength = s -> s.length();
+		Function<String, Integer> myStringLength = (String s) -> s.length();
 	}
 	
 	@Test
@@ -155,18 +156,30 @@ public class Lambda {
 	
 	@Test
 	public void testPrimitiveFunctions() {
-		IntFunction<String> intFunctionString = i -> String.valueOf(i);
-		LongFunction<String> longFunctionString = l -> String.valueOf(l);
-		DoubleFunction<String> doubleFunctionString = d -> String.valueOf(d);
-		
+		IntFunction<String> intFunctionString = i -> "X" + i;
+		System.out.println(intFunctionString.apply(123)); // X123
+
+		LongFunction<String> longFunctionString = l -> "Y" + String.valueOf(l);
+		System.out.println(longFunctionString.apply(420L)); // Y420
+
+		DoubleFunction<String> doubleFunctionString = d -> String.valueOf(d) + "!"; // 2.718281828459045!
+		System.out.println(doubleFunctionString.apply(Math.E));
+
 		ToIntFunction<String> stringToInt = s -> s.length();
+		System.out.println(1 + stringToInt.applyAsInt("Hello")); // 6
+
 		ToLongFunction<String> stringToLong = s -> s.length();
+		System.out.println(stringToLong.applyAsLong("Whatever")); // 8
+
 		ToDoubleFunction<String> stringToDouble = s-> s.length() + 0.5;
-		
+		System.out.println(stringToDouble.applyAsDouble("Mike")); // 4.5
+
 		IntToLongFunction intToLong = i -> i + 1L;
 		IntToDoubleFunction intToDouble = i -> i + 0.5;
 		
 		LongToIntFunction longToInt = l -> String.valueOf(l).length();
+		System.out.println(longToInt.applyAsInt(123L)); // 3
+
 		LongToDoubleFunction longToDouble = l -> l + 0.5;
 		DoubleToIntFunction doubleToInt = d -> (int)Math.floor(d);
 		DoubleToLongFunction doubleToLong = d -> (long)Math.floor(d);
@@ -181,6 +194,13 @@ public class Lambda {
 		ObjIntConsumer<String> objIntConsumerString = (String s, int i) -> System.out.println(s + ": " + i);
 		ObjLongConsumer<String> objLongConsumerString = (String s, long l) -> System.out.println(s + ": " + l);
 		ObjDoubleConsumer<String> objDoubleConsumerString = (String s, double d) -> System.out.println(s + ": " + d);
+
+
+		ObjIntConsumer<File> intFileConsumer = (File file, int i) -> {
+			System.out.println(i + (file.exists() ? 1 : 2));
+		};
+
+		intFileConsumer.accept(new File("C:/not_there.jpg"), 69); // 71
 	}
 	
 	@Test
@@ -214,6 +234,26 @@ public class Lambda {
 		
 		int val = biFunction.apply("HELLO", 3.141);
 		assertTrue(val == 8);
+
+		ToDoubleBiFunction<String, Integer> tdbf = (String s, Integer i) -> Math.PI;
+		tdbf.applyAsDouble("This", new Integer(31337));
+
+		ToDoubleBiFunction<String, Integer> tdbf2 = (String s, Integer i) -> {
+			int c;
+			return Math.PI;
+		};
+	}
+
+	@Test
+	public void testNeedToAssign() {
+		int a;
+		int b = 1;
+		int c = b + b;
+		int d = c;
+
+		if (false) {
+			System.out.println(a);
+		}
 	}
 	
 	// Develop code that uses the UnaryOperator interface
@@ -251,6 +291,19 @@ public class Lambda {
 		LongUnaryOperator longOp = l -> -l;
 		DoubleUnaryOperator dblOp = d -> -d;
 		
+	}
+
+	@Test
+	public void testIntUnaryOperator() {
+		IntUnaryOperator intOp = i -> -i;
+		System.out.println(intOp.applyAsInt(747)); // -747
+
+		IntUnaryOperator intOp2 = i -> (int) (i / Math.PI);
+		IntUnaryOperator intOp3 = i -> (int) 30L;
+
+		// can't do this, incompatible types
+		//IntUnaryOperator intOp4 = (Integer i) -> i;
+
 	}
 
 	@Test

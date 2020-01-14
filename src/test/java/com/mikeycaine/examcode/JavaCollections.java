@@ -1,27 +1,23 @@
 package com.mikeycaine.examcode;
 
+import static java.util.stream.Collectors.toList;
 import static org.junit.Assert.*;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.OptionalDouble;
-import java.util.OptionalInt;
-import java.util.Set;
-import java.util.function.Predicate;
-import java.util.function.ToIntFunction;
-import java.util.function.UnaryOperator;
+import java.text.DateFormatSymbols;
+import java.time.DayOfWeek;
+import java.time.format.TextStyle;
+import java.time.temporal.ChronoUnit;
+import java.util.*;
+import java.util.function.*;
 import java.util.stream.Collectors;
 import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import org.junit.Test;
+
+import javax.swing.plaf.basic.BasicInternalFrameTitlePane;
+
 import static org.hamcrest.core.Is.*;
 
 public class JavaCollections {
@@ -65,7 +61,7 @@ public class JavaCollections {
 		Predicate<String> isUpperCase = s -> s.toUpperCase().equals(s);
 		
 		List<String> myList = Arrays.asList("one", "Two", "three", "FOUR");
-		List<String> result = myList.stream().filter(isUpperCase).collect(Collectors.toList());
+		List<String> result = myList.stream().filter(isUpperCase).collect(toList());
 		
 		assertTrue(result.size() == 1);
 		assertTrue(result.contains("FOUR"));
@@ -218,7 +214,7 @@ public class JavaCollections {
 	@Test
 	public void testCollect() {
 		Stream<Integer> myStream = Stream.of(11, 22, 33, 44);
-		List<Integer> myList = myStream.collect(Collectors.toList());
+		List<Integer> myList = myStream.collect(toList());
 		assertThat(myList.size(), is(4));
 	}
 	
@@ -398,7 +394,7 @@ public class JavaCollections {
 		Stream<String> myStream = Arrays.stream(names);
 		Stream<String> myStream2 = Arrays.stream(names2);
 		
-		List<String> result = Stream.concat(myStream, myStream2).collect(Collectors.toList());
+		List<String> result = Stream.concat(myStream, myStream2).collect(toList());
 		assertThat(result.get(0), is("Matthew"));
 		assertThat(result.get(1), is("Mark"));
 		assertThat(result.get(2), is("Luke"));
@@ -412,23 +408,149 @@ public class JavaCollections {
 	@Test
 	public void testFlatMap() {
 		Stream<String> names = Stream.of("Matthew", "Mark", "Luke", "John");
-		List<String> result = names.flatMap(s -> Stream.of(s,s,s)).collect(Collectors.toList());
+		List<String> result = names.flatMap(s -> Stream.of(s,s,s)).collect(toList());
 		assertThat(result.size(), is(12));
 	}
 	
 	@Test
 	public void testFlatMap2() {
 		Stream<String> names = Stream.of("Matthew", "Mark", "Luke", "John");
-		List<String> result = names.flatMap(s -> Arrays.asList(s,s,s).stream()).collect(Collectors.toList());
+		List<String> result = names.flatMap(s -> Arrays.asList(s,s,s).stream()).collect(toList());
 		assertThat(result.size(), is(12));
 	}
 	
 	@Test
 	public void testMap() {
 		Stream<String> names = Stream.of("Matthew", "Mark", "Luke", "John");
-		List<String> result = names.map(s -> s + ":" + s).collect(Collectors.toList());
+		List<String> result = names.map(s -> s + ":" + s).collect(toList());
 		assertThat(result.size(), is(4));
 		assertThat(result.get(0), is("Matthew:Matthew"));
+	}
+
+	@Test
+	public void testDeque() {
+		Deque<String> deq = new ArrayDeque<>();
+
+		deq.push("First");
+		deq.push("Second");
+		deq.push("Third");
+		deq.push("Fourth");
+
+		String result = deq.stream().collect(Collectors.joining(", "));
+		System.out.println(result); // Fourth, Third, Second, First
+	}
+
+	@Test
+	public void testDeque2() {
+		Deque<String> deq = new ArrayDeque<>();
+
+		deq.addLast("First");
+		deq.addLast("Second");
+		deq.addLast("Third");
+		deq.addLast("Fourth");
+
+		String result = deq.stream().collect(Collectors.joining(", "));
+		System.out.println(result); // First, Second, Third, Fourth
+	}
+
+	@Test
+	public void testDeque3() {
+		Deque<String> deq = new ArrayDeque<>();
+
+		deq.addLast("First");
+		deq.addLast("Second");
+		deq.addLast("Third");
+		deq.addLast("Fourth");
+		deq.addLast("Fifth");
+		deq.addLast("Sixth");
+
+		System.out.println("STATE: " + deq.stream().collect(Collectors.joining(", ")));   // STATE: First, Second, Third, Fourth, Fifth, Sixth
+		String a = deq.getFirst();
+		System.out.println(a); // First
+
+		System.out.println("STATE2: " + deq.stream().collect(Collectors.joining(", ")));   // STATE2: First, Second, Third, Fourth, Fifth, Sixth
+		String b = deq.getFirst();
+		System.out.println(b); // First
+
+		System.out.println("STATE3: " + deq.stream().collect(Collectors.joining(", ")));   // STATE3: First, Second, Third, Fourth, Fifth, Sixth
+		String c = deq.pop();
+		System.out.println(c); // First
+
+		System.out.println("STATE4: " + deq.stream().collect(Collectors.joining(", ")));  // STATE4: Second, Third, Fourth, Fifth, Sixth
+		String d = deq.pop();
+		System.out.println(d); // Second
+
+		System.out.println("STATE5: " + deq.stream().collect(Collectors.joining(", ")));  // STATE5: Third, Fourth, Fifth, Sixth
+		String e = deq.getLast();
+		System.out.println(e); // Sixth
+
+		System.out.println("STATE6: " + deq.stream().collect(Collectors.joining(", ")));  // STATE6: Third, Fourth, Fifth, Sixth
+		String f = deq.remove();
+		System.out.println(f); // Third
+
+		System.out.println("STATE7: " + deq.stream().collect(Collectors.joining(", ")));  // STATE7: Fourth, Fifth, Sixth
+		String g = deq.peek();
+		System.out.println(g); // Fourth
+
+		System.out.println("STATE8: " + deq.stream().collect(Collectors.joining(", "))); // STATE8: Fourth, Fifth, Sixth
+		String h = deq.peekFirst();
+		System.out.println(h); // Fourth
+
+		System.out.println("STATE9: " + deq.stream().collect(Collectors.joining(", "))); // STATE9: Fourth, Fifth, Sixth
+		String j = deq.peekLast();
+		System.out.println("j = " + j); // j = Sixth
+
+		System.out.println("STATE10: " + deq.stream().collect(Collectors.joining(", "))); // STATE10: Fourth, Fifth, Sixth
+		String k = deq.poll();
+		System.out.println("k = " + k); // k = Fourth
+
+		System.out.println("STATE11: " + deq.stream().collect(Collectors.joining(", ")));
+		String l = deq.pop();
+
+		System.out.println("l = " + l); //
+
+		String m = deq.pop();
+		System.out.println("m = " + m); //
+
+		String n = deq.pop();
+		System.out.println("n = " + n); //
+
+
+	}
+
+	@Test
+	public void testMapMerge() {
+		String [] monthNames = new DateFormatSymbols().getMonths();
+		for (int i = 0; i < monthNames.length; ++i) {
+			System.out.println(i + " : " + monthNames[i]);
+		}
+		System.out.println();
+
+		Map<String, String> result = Arrays.stream(monthNames).limit(4).collect(Collectors.toMap(Function.identity(), Function.identity()));
+		System.out.println(result); // {March=March, February=February, January=January, April=April}
+
+		// Changing the limit(3) call to limit(4) will give "java.lang.IllegalStateException: Duplicate key March" since March and April are the same length
+		Map<Integer, String> result2 = Arrays.stream(monthNames).limit(3).collect(Collectors.toMap(String::length, Function.identity()));
+		System.out.println(result2); // {5=March, 7=January, 8=February}
+
+		// This is probably what we wanted ;-)
+		Map<Integer, List<String>> result3 = Arrays.stream(monthNames).collect(Collectors.groupingBy(String::length));
+		System.out.println(result3); // {0=[], 3=[May], 4=[June, July], 5=[March, April], 6=[August], 7=[January, October], 8=[February, November, December], 9=[September]}
+
+		System.out.println();
+
+		List<String> dayNames = Arrays.stream(DayOfWeek.values()).map(dow -> dow.getDisplayName(TextStyle.FULL, Locale.getDefault())).collect(toList());
+		dayNames.forEach(dn -> {
+
+			result3.merge(dn.length(), Arrays.asList(dn), (a, b) -> {
+				List<String> r = new ArrayList<>();
+				r.addAll(a);
+				r.addAll(b);
+				return r;
+			});
+		});
+
+		System.out.println(result3); // {0=[], 3=[May], 4=[June, July], 5=[March, April], 6=[August, Monday, Friday, Sunday], etc
 	}
 
 }
